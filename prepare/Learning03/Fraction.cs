@@ -18,7 +18,7 @@ class Fraction
     public Fraction(int numerator, int denominator)
     {
         _numerator = numerator;
-        _denominator = denomonator;
+        _denominator = denominator;
     }
 
     public int GetNumerator()
