@@ -14,12 +14,12 @@ public abstract class PlayerCharacter : Character
         _inventory.Add(potion);
     }
 
-    public void UsePotion()
+    public void UsePotion(PlayerCharacter target)
     {
         if (_inventory.Count > 0)
         {
             Potion potion = _inventory[0];
-            potion.Use(this);
+            potion.Use(target);
             _inventory.RemoveAt(0);
         }
     }

@@ -27,6 +27,10 @@ public void TakeDamage(int amount)
         {
             _health = 0;
         }
+        if (_health > _maxHealth)
+        {
+            _health = _maxHealth;
+        }
     }
 
 public string GetStatus()

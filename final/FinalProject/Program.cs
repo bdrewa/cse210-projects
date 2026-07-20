@@ -55,35 +55,83 @@ class Program
             }
         }
 
-        Console.WriteLine("\nChoose your path into the dungeon:");
-        Console.WriteLine("1. Through the Whispering Forest");
-        Console.WriteLine("2. Through the Sunken Caves");
-        Console.WriteLine("3. Through the Frostbitten Pass");
-        Console.Write("Choice: ");
-        string pathChoice = Console.ReadLine();
-
-        if (pathChoice == "1")
-        {
-            Console.WriteLine("\nYour party steps into the Whispering Forest, shadows moving between the trees...");
-        }
-        else if (pathChoice == "2")
-        {
-            Console.WriteLine("\nYour party descends into the Sunken Caves, water dripping into the darkness...");
-        }
-        else
-        {
-            Console.WriteLine("\nYour party trudges into the Frostbitten Pass, wind howling around you...");
-        }
-
         EncounterGenerator generator = new EncounterGenerator();
         Battle battle = new Battle();
 
-        for (int i = 0; i < 3; i++)
+        List<string> pathsCompleted = new List<string>();
+        bool exploring = true;
+
+        while (exploring && pathsCompleted.Count < 3 && !party.IsDefeated())
         {
-            if (!party.IsDefeated())
+            Console.WriteLine("\nChoose your path into the dungeon:");
+            if (!pathsCompleted.Contains("1"))
             {
-                List<Monster> encounter = generator.GetRandomEncounter();
-                battle.Fight(party, encounter);
+                Console.WriteLine("1. Through the Whispering Forest");
+            }
+            if (!pathsCompleted.Contains("2"))
+            {
+                Console.WriteLine("2. Through the Sunken Caves");
+            }
+            if (!pathsCompleted.Contains("3"))
+            {
+                Console.WriteLine("3. Through the Frostbitten Pass");
+            }
+            Console.Write("Choice: ");
+            string pathChoice = Console.ReadLine();
+
+            if (pathsCompleted.Contains(pathChoice))
+            {
+                Console.WriteLine("You've already explored that path.");
+                continue;
+            }
+
+            if (pathChoice == "1")
+            {
+                Console.WriteLine("\nYour party steps into the Whispering Forest, shadows moving between the trees...");
+            }
+            else if (pathChoice == "2")
+            {
+                Console.WriteLine("\nYour party descends into the Sunken Caves, water dripping into the darkness...");
+            }
+            else if (pathChoice == "3")
+            {
+                Console.WriteLine("\nYour party trudges into the Frostbitten Pass, wind howling around you...");
+            }
+            else
+            {
+                Console.WriteLine("Not a valid choice.");
+                continue;
+            }
+
+            pathsCompleted.Add(pathChoice);
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (!party.IsDefeated())
+                {
+                    List<Monster> encounter = generator.GetRandomEncounter();
+                    string intro = generator.GetEncounterIntro(encounter);
+                    battle.Fight(party, encounter, intro);
+
+                    if (!party.IsDefeated())
+                    {
+                        Console.WriteLine($"\n{generator.GetVictoryOutro()}");
+                    }
+                }
+            }
+
+            if (party.IsDefeated() || pathsCompleted.Count == 3)
+            {
+                exploring = false;
+            }
+            else
+            {
+                Console.Write("\nExplore another path? (y/n): ");
+                string continueChoice = Console.ReadLine();
+                if (continueChoice.ToLower() != "y")
+                {
+                    exploring = false;
+                }
             }
         }
 

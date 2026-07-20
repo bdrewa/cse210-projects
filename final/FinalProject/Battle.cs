@@ -10,8 +10,9 @@ public class Battle
         _random = new Random();
     }
 
-    public void Fight(Party party, List<Monster> monsters)
+    public void Fight(Party party, List<Monster> monsters, string introText)
     {
+        Console.WriteLine($"\n{introText}");
         Console.WriteLine("Monsters approach:");
         foreach (Monster monster in monsters)
         {
@@ -31,18 +32,23 @@ public class Battle
                     break;
                 }
 
-                TakeTurn(member, monsters);
+                TakeTurn(member, monsters, party);
             }
 
-            foreach (Monster monster in monsters)
+            if (AnyAlive(monsters) && !party.IsDefeated())
             {
-                if (monster.IsAlive() && !party.IsDefeated())
+                Console.WriteLine();
+                foreach (Monster monster in monsters)
                 {
-                    Console.WriteLine(monster.Attack(party.GetMembers()[0]));
+                    if (monster.IsAlive())
+                    {
+                        Console.WriteLine(monster.Attack(party.GetMembers()[0]));
+                    }
                 }
             }
         }
 
+        Console.WriteLine();
         if (AnyAlive(monsters))
         {
             Console.WriteLine("Your party was defeated...");
@@ -54,7 +60,7 @@ public class Battle
         }
     }
 
-    private void TakeTurn(PlayerCharacter member, List<Monster> monsters)
+    private void TakeTurn(PlayerCharacter member, List<Monster> monsters, Party party)
     {
         Console.WriteLine($"\n{member.GetName()}'s turn! ({member.GetStatus()})");
         Console.WriteLine("1. Attack");
@@ -67,15 +73,15 @@ public class Battle
 
         if (choice == "2" && member.HasPotions())
         {
-            member.UsePotion();
-            Console.WriteLine($"{member.GetName()} drinks a potion. ({member.GetStatus()})");
+            PlayerCharacter healTarget = ChooseAlly(party);
+            member.UsePotion(healTarget);
+            Console.WriteLine($"{member.GetName()} gives a potion to {healTarget.GetName()}. ({healTarget.GetStatus()})");
         }
         else
         {
             Monster target = ChooseTarget(monsters);
             Console.WriteLine(member.Attack(target));
         }
-        Console.WriteLine();
     }
 
     private Monster ChooseTarget(List<Monster> monsters)
@@ -108,6 +114,38 @@ public class Battle
             return aliveMonsters[index];
         }
         return aliveMonsters[0];
+    }
+
+    private PlayerCharacter ChooseAlly(Party party)
+    {
+        List<PlayerCharacter> aliveMembers = new List<PlayerCharacter>();
+        foreach (PlayerCharacter member in party.GetMembers())
+        {
+            if (member.IsAlive())
+            {
+                aliveMembers.Add(member);
+            }
+        }
+
+        if (aliveMembers.Count == 1)
+        {
+            return aliveMembers[0];
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Who should receive the potion?");
+        for (int i = 0; i < aliveMembers.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {aliveMembers[i].GetStatus()}");
+        }
+        Console.Write("Choice: ");
+        int index = int.Parse(Console.ReadLine()) - 1;
+
+        if (index >= 0 && index < aliveMembers.Count)
+        {
+            return aliveMembers[index];
+        }
+        return aliveMembers[0];
     }
 
     private bool AnyAlive(List<Monster> monsters)
